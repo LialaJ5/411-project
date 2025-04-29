@@ -1,11 +1,13 @@
+#key : boxing = weatherFolder \ boxer_model = cities_model \ Boxers = Cities \
+
 import pytest
 
-from boxing.models.boxers_model import Boxers
+from weatherFolder.models.cities_model import Cities
 
 # --- Fixtures ---
 
 @pytest.fixture
-def boxer_ali(session):
+def city_Boston(session):
     """Fixture for Muhammad Ali."""
     boxer = Boxers(name="Boston", lat=52.97, lon=-0.02)
     session.add(boxer)
@@ -24,14 +26,14 @@ def boxer_tyson(session):
 
 # --- Create Boxer ---
 
-def test_create_boxer(session):
-    """Test creating a new boxer."""
-    Boxers.create_boxer("Alberta", lat=36.86, lon=-112.62)
-    boxer = session.query(Boxers).filter_by(name="Alberta").first()
-    assert boxer is not None
+def test_create_city(session):
+    """Test creating a new city."""
+    CIties.create_city("Alberta", lat=36.86, lon=-112.62)
+    city = session.query(Cities).filter_by(name="Alberta").first()
+    assert city is not None
 
 
-def test_create_boxer_duplicate_name(session, boxer_ali):
+def test_create_city_duplicate_name(session, boxer_ali):
     """Test creating a boxer with a duplicate name."""
     with pytest.raises(ValueError, match="already exists"):
         Boxers.create_boxer("Boston",52.97, -0.02)

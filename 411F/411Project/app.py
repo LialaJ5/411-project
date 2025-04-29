@@ -5,10 +5,10 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 
 from config import ProductionConfig
 
-from boxing.db import db
-from boxing.models.boxers_model import Boxers
-from boxing.models.ring_model import RingModel
-from boxing.models.user_model import Users
+from weatherFolder.db import db
+from weatherFolder.models.cities_model import Cities
+from weatherFolder.models.favorites_model import FavoritesModel
+from weatherFolder.models.user_model import Users
 from boxing.utils.logger import configure_logger
 
 
@@ -40,7 +40,7 @@ def create_app(config_class=ProductionConfig):
         }), 401)
 
 
-    ring_model = RingModel()
+    favorites_model = FavoritesModel()
 
 
     ####################################################
