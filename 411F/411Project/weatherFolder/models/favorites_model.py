@@ -4,20 +4,21 @@ import os
 import time
 from typing import List
 
-from boxing.models.boxers_model import Boxers
-from boxing.utils.logger import configure_logger
-from boxing.utils.api_utils import get_random
+from weatherFolder.models.cities_model import Cities
+from weatherFolder.utils.logger import configure_logger
+from weatherFolder.utils.api_utils import get_random
 
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
 
-class RingModel:
+class FavoritesModel:
     """A class to manage the the ring in which boxers have fights.
 
     """
 
+ #CHANGE
     def __init__(self):
         """Initializes the RingManager with an empty list of combatants.
 
@@ -41,61 +42,6 @@ class RingModel:
 
         self.favorites: List[int] = []
 
-    def fight(self) -> str:
-        """Simulates a fight between two combatants.
-
-        Simulates a fight between two combatants. Computes their fighting skill levels,
-        normalizes the difference, and determines the winner based on a random number.
-
-        Returns:
-            str: The name of the winning boxer.
-
-        Raises:
-            ValueError: If there are not enough boxers in the ring.
-
-        """
-        if len(self.ring) < 2:
-            logger.error("There must be two boxers to start a fight.")
-            raise ValueError("There must be two boxers to start a fight.")
-
-        boxer_1, boxer_2 = self.get_boxers()
-
-        logger.info(f"Fight started between {boxer_1.name} and {boxer_2.name}")
-
-        skill_1 = self.get_fighting_skill(boxer_1)
-        skill_2 = self.get_fighting_skill(boxer_2)
-
-        logger.debug(f"Fighting skill for {boxer_1.name}: {skill_1:.3f}")
-        logger.debug(f"Fighting skill for {boxer_2.name}: {skill_2:.3f}")
-
-        # Compute the absolute skill difference
-        # And normalize using a logistic function for better probability scaling
-        delta = abs(skill_1 - skill_2)
-        normalized_delta = 1 / (1 + math.e ** (-delta))
-
-        logger.debug(f"Raw delta between skills: {delta:.3f}")
-        logger.debug(f"Normalized delta: {normalized_delta:.3f}")
-
-        random_number = get_random()
-
-        logger.debug(f"Random number from random.org: {random_number:.3f}")
-
-        if random_number < normalized_delta:
-            winner = boxer_1
-            loser = boxer_2
-        else:
-            winner = boxer_2
-            loser = boxer_1
-
-        logger.info(f"The winner is: {winner.name}")
-
-        winner.update_stats('win')
-        loser.update_stats('loss')
-
-        self.clear_ring()
-
-        return winner.name
-
     def clear_ring(self):
         """Clears the list of boxers.
 
@@ -107,7 +53,9 @@ class RingModel:
         self.ring.clear()
 
 
-    def enter_ring(self, boxer_id: int):
+ #CHANGE
+    #formerly enter_ring
+    def add_to_favorite(self, city_id: int):
         """Prepares a boxer by adding them to the ring for an upcoming fight.
 
         Args:
@@ -149,8 +97,10 @@ class RingModel:
 
         logger.info(f"Current cities in the favorites: {[Cities.get_city_by_id(b).name for b in self.favorites]}")
 
+    def get_weather_city(self, city_id) -> None:
 
-    def get_boxers(self) -> List[Boxers]:
+    #formerly get_boxers
+    def get_all_cities_and_weather(self) -> List[Boxers]:
         """Retrieves the current list of boxers in the ring.
 
         Returns:
@@ -203,10 +153,15 @@ class RingModel:
         logger.info(f"Fighting skill for {boxer.name}: {skill:.3f}")
         return skill
 
-    def clear_cache(self):
+    #formerly clear_cache
+    def clear_cities(self):
         """Clears the local TTL cache of boxer objects.
 
         """
         logger.info("Clearing local boxer cache in RingModel.")
         self._boxer_cache.clear()
         self._ttl.clear()
+
+    def get_forecast_city(self, city_id) -> None:
+
+        

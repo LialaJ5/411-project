@@ -65,42 +65,10 @@ class Cities(db.Model):
         self.lat = lat
         self.lon = lon
 
-    @classmethod
-    def get_weight_class(cls, weight: float) -> str:
-        """Determine the weight class based on weight.
-
-        This method is defined as a class method rather than a static method,
-        even though it does not currently require access to the class object.
-        Both @staticmethod and @classmethod would be valid choices in this context;
-        however, using @classmethod makes it easier to support subclass-specific
-        behavior or logic overrides in the future.
-
-        Args:
-            weight: The weight of the boxer.
-
-        Returns:
-            str: The weight class of the boxer.
-
-        Raises:
-            ValueError: If the weight is less than 125.
-
-        """
-        logger.info(f"Determining weight class for weight: {weight}")
-        if weight >= 203:
-            return 'HEAVYWEIGHT'
-        elif weight >= 166:
-            return 'MIDDLEWEIGHT'
-        elif weight >= 133:
-            return 'LIGHTWEIGHT'
-        elif weight >= 125:
-            return 'FEATHERWEIGHT'
-        else:
-            logger.error(f"Invalid weight: {weight}. Weight must be at least 125.")
-            raise ValueError(f"Invalid weight: {weight}. Weight must be at least 125.")
 
  #CHANGE
     @classmethod
-    def create_boxer(cls, name: str, lat: float, lon: float) -> None:
+    def create_city(cls, name: str, lat: float, lon: float) -> None:
         """Create and persist a new Boxer instance.
 
         Args:
@@ -202,7 +170,7 @@ class Cities(db.Model):
 
  #CHANGE
     @classmethod
-    def getWeather(self) -> None:
+    def getWeather(self) -> str:
         """Delete a boxer by ID.
 
         Args:
@@ -229,72 +197,9 @@ class Cities(db.Model):
 
             if response.status_code == 200:
                 data = response.json()
+                return data.weather.description
             else:
                 logger.info("No weather for that city.")
         except Exception as e:
             raise(f"Error with {e}")
-    def update_stats(self, result: str) -> None:
-        """Update the boxer's fight and win count based on result.
 
-        Args:
-            result: The result of the fight ('win' or 'loss').
-
-        Raises:
-            ValueError: If the result is not 'win' or 'loss'.
-            ValueError: If the number of wins exceeds the number of fights.
-
-        """
-        if result not in {"win", "loss"}:
-            raise ValueError("Result must be 'win' or 'loss'.")
-
-        self.fights += 1
-        if result == "win":
-            self.wins += 1
-
-        if self.wins > self.fights:
-            raise ValueError("Wins cannot exceed number of fights.")
-
-        db.session.commit()
-        logger.info(f"Updated stats for boxer {self.name}: {self.fights} fights, {self.wins} wins.")
-
-    @staticmethod
-    def get_leaderboard(sort_by: str = "wins") -> List[dict]:
-        """Retrieve a sorted leaderboard of boxers.
-
-        Args:
-            sort_by (str): Either "wins" or "win_pct".
-
-        Returns:
-            List[Dict]: List of boxers with stats and win percentage.
-
-        Raises:
-            ValueError: If the sort_by parameter is not valid.
-
-        """
-        logger.info(f"Retrieving leaderboard. Sort by: {sort_by}")
-
-        if sort_by not in {"wins", "win_pct"}:
-            logger.error(f"Invalid sort_by parameter: {sort_by}")
-            raise ValueError(f"Invalid sort_by parameter: {sort_by}")
-
-        boxers = Boxers.query.filter(Boxers.fights > 0).all()
-
-        def compute_win_pct(b: Boxers) -> float:
-            return round((b.wins / b.fights) * 100, 1) if b.fights > 0 else 0.0
-
-        leaderboard = [{
-            "id": b.id,
-            "name": b.name,
-            "weight": b.weight,
-            "height": b.height,
-            "reach": b.reach,
-            "age": b.age,
-            "weight_class": b.weight_class,
-            "fights": b.fights,
-            "wins": b.wins,
-            "win_pct": compute_win_pct(b)
-        } for b in boxers]
-
-        leaderboard.sort(key=lambda b: b[sort_by], reverse=True)
-        logger.info("Leaderboard retrieved successfully.")
-        return leaderboard
