@@ -100,34 +100,34 @@ class FavoritesModel:
     def get_weather_city(self, city_id) -> None:
 
     #formerly get_boxers
-    def get_all_cities_and_weather(self) -> List[Boxers]:
-        """Retrieves the current list of boxers in the ring.
+    def get_all_cities_and_weather(self) -> List[Cities]:
+        """Retrieves the current list of cities in the list.
 
         Returns:
-            List[Boxers]: A list of Boxers dataclass instances representing the boxers in the ring.
+            List[Cities]: A list of Cities dataclass instances representing the cities in the favorites list.
 
         """
         if not self.ring:
-            logger.warning("Retrieving boxers from an empty ring.")
+            logger.warning("Retrieving cities from an empty list.")
         else:
-            logger.info(f"Retrieving {len(self.ring)} boxers from the ring.")
+            logger.info(f"Retrieving {len(self.favorites)} cities from the list.")
 
         now = time.time()
-        boxers: List[Boxers] = []
+        cities: List[Cities] = []
 
-        for boxer_id in self.ring:
-            expired = boxer_id not in self._ttl or now > self._ttl[boxer_id]
+        for city_id in self.favorites:
+            expired = city_id not in self._ttl or now > self._ttl[city_id]
             if expired:
-                logger.info(f"TTL expired or missing for boxer {boxer_id}. Refreshing from DB.")
-                boxer = Boxers.get_boxer_by_id(boxer_id)
-                self._boxer_cache[boxer_id] = boxer
-                self._ttl[boxer_id] = now + self.ttl_seconds
+                logger.info(f"TTL expired or missing for boxer {city_id}. Refreshing from DB.")
+                city = Cities.get_city_by_id(city_id)
+                self._boxer_cache[city_id] = city
+                self._ttl[city_id] = now + self.ttl_seconds
             else:
-                logger.debug(f"Using cached boxer {boxer_id} (TTL valid).")
-            boxers.append(self._boxer_cache[boxer_id])
+                logger.debug(f"Using cached boxer {city_id} (TTL valid).")
+            cities.append(self._boxer_cache[city_id])
 
-        logger.info(f"Retrieved {len(boxers)} boxers from the ring.")
-        return boxers
+        logger.info(f"Retrieved {len(cities)} boxers from the ring.")
+        return cities
 
     def get_fighting_skill(self, boxer: Boxers) -> float:
         """Calculates the fighting skill for a boxer based on arbitrary rules.
