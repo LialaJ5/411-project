@@ -3,9 +3,6 @@ import math
 import os
 import time
 from typing import List
-import requests
-import os
-from dotenv import load_dotenv
 
 from boxing.models.boxers_model import Boxers
 from boxing.utils.logger import configure_logger
