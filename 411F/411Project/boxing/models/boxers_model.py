@@ -15,6 +15,7 @@ configure_logger(logger)
 
 load_dotenv()
 
+ #CHANGED
 class Boxers(db.Model):
     """Represents a competitive boxer in the system.
 
@@ -97,6 +98,7 @@ class Boxers(db.Model):
             logger.error(f"Invalid weight: {weight}. Weight must be at least 125.")
             raise ValueError(f"Invalid weight: {weight}. Weight must be at least 125.")
 
+ #CHANGED
     @classmethod
     def create_boxer(cls, name: str, lat: float, lon: float) -> None:
         """Create and persist a new Boxer instance.
@@ -198,6 +200,7 @@ class Boxers(db.Model):
             raise ValueError(f"Boxer '{name}' not found.")
         return boxer
 
+ #CHANGES
     @classmethod
     def getWeather(self) -> None:
         """Delete a boxer by ID.
