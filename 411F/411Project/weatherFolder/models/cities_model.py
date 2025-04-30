@@ -129,7 +129,7 @@ class Cities(db.Model):
 
 
     @classmethod
-    def get_boxer_by_id(cls, boxer_id: int) -> "Boxers":
+    def get_city_by_id(cls, city_id: int) -> "Cities":
         """Retrieve a boxer by ID.
 
         Args:
@@ -142,12 +142,12 @@ class Cities(db.Model):
             ValueError: If the boxer with the given ID does not exist.
 
         """
-        boxer = cls.query.get(boxer_id)
-        if boxer is None:
-            logger.info(f"Boxer with ID {boxer_id} not found.")
-            raise ValueError(f"Boxer with ID {boxer_id} not found.")
-        return boxer
-
+        city = cls.query.get(city_id)
+        if city is None:
+            logger.info(f"CIty with ID {city_id} not found.")
+            raise ValueError(f"City with ID {city_id} not found.")
+        return city
+    
     @classmethod
     def get_boxer_by_name(cls, name: str) -> "Boxers":
         """Retrieve a boxer by name.
@@ -196,6 +196,7 @@ class Cities(db.Model):
             response = requests.get(url)
 
             if response.status_code == 200:
+                logger.info("Weather retrieved")
                 data = response.json()
                 return data.weather.description
             else:
