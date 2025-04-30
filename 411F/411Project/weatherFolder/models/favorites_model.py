@@ -91,12 +91,12 @@ class FavoritesModel:
     
     #formerly get_boxers
     def get_all_cities_and_weather(self) -> List[str,str]:
-        "Retrieves the current list of cities in the list.
+        """Retrieves the current list of cities in the list.
 
         Returns:
             List[Cities]: A list of Cities dataclass instances representing the cities in the favorites list.
 
-        "
+        """
         if not self.ring:
             logger.warning("Retrieving cities from an empty list.")
         else:
@@ -121,7 +121,7 @@ class FavoritesModel:
         return cities
 
     def get_fighting_skill(self, boxer: Boxers) -> float:
-        "Calculates the fighting skill for a boxer based on arbitrary rules.
+        """Calculates the fighting skill for a boxer based on arbitrary rules.
 
         The fighting skill is computed as:
         - Multiply the boxer's weight by the number of letters in their name.
@@ -134,7 +134,7 @@ class FavoritesModel:
         Returns:
             float: The calculated fighting skill.
 
-        "
+        """
         logger.info(f"Calculating fighting skill for {boxer.name}: weight={boxer.weight}, age={boxer.age}, reach={boxer.reach}")
 
         # Arbitrary calculations
