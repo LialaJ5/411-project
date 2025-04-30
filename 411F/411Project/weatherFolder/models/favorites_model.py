@@ -2,6 +2,7 @@ import logging
 import math
 import os
 import time
+import requests
 from typing import List
 
 from weatherFolder.models.cities_model import Cities
@@ -43,7 +44,7 @@ class FavoritesModel:
 
 #CHANGE (Finish)
     # Formerly clear_ring
-    def clear_city(self):
+    def clear_favorites(self):
         """Clears the list of cities.
         """
         if not self.favorites:
@@ -144,5 +145,58 @@ class FavoritesModel:
         logger.info(f"Fighting skill for {boxer.name}: {skill:.3f}")
         return skill
     
-    def get_forecast_city(self, city_id) -> None:
-        return False
+#CHANGE (Finish)
+    def get_forecast_city(self, city_id: int) -> dict:
+        """Get the weather forecast for the specified favorite city.
+
+        Args:
+            city_id (int): ID of the favorite city.
+
+        Returns:
+            dict: Contains the city name and a 5-day weather forecast.
+            
+        Raises:
+            ValueError: If city_id is not in favorites or the city does not exist.
+        """
+        if city_id not in self.favorites:
+            raise ValueError(f"City ID {city_id} is not in favorites.")
+        
+        try:
+            city = Cities.get_city_by_id(city_id)
+        except ValueError as e:
+            logger.error(str(e))
+            raise
+        
+        key = os.getenv("WEATHER_KEY")
+        if not key:
+            raise ValueError("Missing OpenWeatherMap API key.")
+        
+        url = f"https://api.openweathermap.org/data/2.5/forecast?lat={city.lat}&lon={city.lon}&appid={key}&units=metric"
+        
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                logger.warning(f"Failed to fetch forecast for {city.name}: {response.status_code}")
+                raise ValueError("Forecast API request failed.")
+        
+            data = response.json()
+            forecast_list = data["list"]
+        
+            daily_forecast = []
+            for entry in forecast_list:
+                if "12:00:00" in entry["dt_txt"]:
+                    daily_forecast.append({
+                        "date": entry["dt_txt"].split(" ")[0],
+                        "high": entry["main"]["temp_max"],
+                        "low": entry["main"]["temp_min"],
+                        "precipitation_chance": entry.get("pop", 0.0),
+                        "condition": entry["weather"][0]["description"]
+                    })
+                
+            logger.info(f"Retrieved {len(daily_forecast)} forecast entries for {city.name}")
+        
+            return {"city": city.name, "forecast": daily_forecast}
+        
+        except Exception as e:
+            logger.error(f"Error fetching forecast for {city.name}: {e}")
+            raise ValueError(f"Error fetching forecast: {e}")
