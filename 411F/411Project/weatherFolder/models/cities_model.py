@@ -6,8 +6,8 @@ from dotenv import load_dotenv, dotenv_values
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from boxing.db import db
-from boxing.utils.logger import configure_logger
+from weatherFolder.db import db
+from weatherFolder.utils.logger import configure_logger
 
 
 logger = logging.getLogger(__name__)
@@ -144,7 +144,7 @@ class Cities(db.Model):
         """
         city = cls.query.get(city_id)
         if city is None:
-            logger.info(f"CIty with ID {city_id} not found.")
+            logger.info(f"City with ID {city_id} not found.")
             raise ValueError(f"City with ID {city_id} not found.")
         return city
     
@@ -169,8 +169,7 @@ class Cities(db.Model):
         return boxer
 
  #CHANGE
-    @classmethod
-    def getWeather(self) -> str:
+    def get_weather(self) -> str:
         """Delete a boxer by ID.
 
         Args:
@@ -201,7 +200,7 @@ class Cities(db.Model):
             if response.status_code == 200:
                 logger.info("Weather retrieved")
                 data = response.json()
-                return data.weather.description
+                return data["weather"][0]["description"]
             else:
                 logger.info("No weather for that city.")
         except Exception as e:

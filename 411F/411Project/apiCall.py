@@ -12,6 +12,6 @@ b = requests.get(url)
 
 if b.status_code == 200:
     data = b.json()
-    print(data)
+    print(data["weather"])
 else:
     print(f"Error: {b.status_code}, {b.text}")

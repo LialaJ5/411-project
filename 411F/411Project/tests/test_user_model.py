@@ -1,6 +1,6 @@
 import pytest
 
-from boxing.models.user_model import Users
+from weatherFolder.models.user_model import Users
 
 
 @pytest.fixture

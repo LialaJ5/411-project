@@ -80,22 +80,23 @@ class FavoritesModel:
         
         logger.info(f"Getting weather for city with id {city_id}")
         try:
-            city = get_city_by_id(city_id)
+            city = Cities.get_city_by_id(city_id)
         except ValueError as e:
             logger.error(str(e))
             raise
         
-        weather = city1.get_weather()
+        weather = city.get_weather()
         return weather
 
+    """
     #formerly get_boxers
     def get_all_cities_and_weather(self) -> List[str,str]:
-        """Retrieves the current list of cities in the list.
+        "Retrieves the current list of cities in the list.
 
         Returns:
             List[Cities]: A list of Cities dataclass instances representing the cities in the favorites list.
 
-        """
+        "
         if not self.ring:
             logger.warning("Retrieving cities from an empty list.")
         else:
@@ -119,8 +120,12 @@ class FavoritesModel:
         logger.info(f"Retrieved {len(cities)} boxers from the ring.")
         return cities
 
+    """
+
+    """
+
     def get_fighting_skill(self, boxer: Boxers) -> float:
-        """Calculates the fighting skill for a boxer based on arbitrary rules.
+        "Calculates the fighting skill for a boxer based on arbitrary rules.
 
         The fighting skill is computed as:
         - Multiply the boxer's weight by the number of letters in their name.
@@ -133,7 +138,7 @@ class FavoritesModel:
         Returns:
             float: The calculated fighting skill.
 
-        """
+        "
         logger.info(f"Calculating fighting skill for {boxer.name}: weight={boxer.weight}, age={boxer.age}, reach={boxer.reach}")
 
         # Arbitrary calculations
@@ -142,7 +147,7 @@ class FavoritesModel:
 
         logger.info(f"Fighting skill for {boxer.name}: {skill:.3f}")
         return skill
+    """
 
     def get_forecast_city(self, city_id) -> None:
-
-        
+        return False

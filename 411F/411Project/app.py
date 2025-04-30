@@ -9,7 +9,7 @@ from weatherFolder.db import db
 from weatherFolder.models.cities_model import Cities
 from weatherFolder.models.favorites_model import FavoritesModel
 from weatherFolder.models.user_model import Users
-from boxing.utils.logger import configure_logger
+from weatherFolder.utils.logger import configure_logger
 
 
 load_dotenv()
