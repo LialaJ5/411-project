@@ -17,7 +17,7 @@ def favorites_model():
 
 # Fixtures providing sample boxers
 @pytest.fixture
-def sample_boxer1(session):
+def sample_city1(session):
     city = Cities(
         name="Boston",
         lat=52.97,
@@ -29,20 +29,20 @@ def sample_boxer1(session):
     session.commit()
     return city
 
-def test_add_to_favorite(favorites_model, sample_boxer1):
+def test_add_to_favorite(favorites_model, sample_city1):
     """Test that a boxer is correctly added to the ring.
 
     """
-    favorites_model.add_to_favorite(sample_boxer1.id)  # Assuming boxer with ID 1 is "Muhammad Ali"
+    favorites_model.add_to_favorite(sample_city1.id)  # Assuming boxer with ID 1 is "Muhammad Ali"
 
     assert len(favorites_model.favorites) == 1, "Ring should contain one boxer after calling enter_ring."
     assert favorites_model.favorites[0]== 1, "Expected 'Muhammad Ali' (id 1) in the ring."
 
 
 
-def test_get_weather_city(favorites_model, sample_boxer1):
+def test_get_weather_city(favorites_model, sample_city1):
     """Test the get_fighting_skill method.
 
     """
     expected_score_1 = "clear sky"
-    assert favorites_model.get_weather_city(sample_boxer1.id) == expected_score_1, f"Expected score: {expected_score_1}"
+    assert favorites_model.get_weather_city(sample_city1.id) == expected_score_1, f"Expected score: {expected_score_1}"
