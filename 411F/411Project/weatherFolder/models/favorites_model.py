@@ -76,7 +76,17 @@ class FavoritesModel:
 
         logger.info(f"Current cities in the favorites: {[Cities.get_city_by_id(b).name for b in self.favorites]}")
 
-    def get_weather_city(self, city_id) -> None:
+    def get_weather_city(self, city_id) -> str:
+        
+        logger.info(f"Getting weather for city with id {city_id}")
+        try:
+            city = get_city_by_id(city_id)
+        except ValueError as e:
+            logger.error(str(e))
+            raise
+        
+        weather = city1.get_weather()
+        return weather
 
     #formerly get_boxers
     def get_all_cities_and_weather(self) -> List[str,str]:

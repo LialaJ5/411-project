@@ -180,6 +180,7 @@ class Cities(db.Model):
             ValueError: If the boxer with the given ID does not exist.
 
         """
+        """
         boxer = cls.get_boxer_by_id(boxer_id)
         if boxer is None:
             logger.info(f"Boxer with ID {boxer_id} not found.")
@@ -187,6 +188,8 @@ class Cities(db.Model):
         db.session.delete(boxer)
         db.session.commit()
         logger.info(f"Boxer with ID {boxer_id} permanently deleted.")
+        """
+
 
         try:
             key = os.getenv("WEATHER_KEY")
