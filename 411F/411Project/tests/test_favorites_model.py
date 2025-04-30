@@ -2,16 +2,19 @@ import time
 
 import pytest
 
-from boxing.models.ring_model import RingModel
-from boxing.models.boxers_model import Boxers
+#from boxing.models.ring_model import RingModel
+#from boxing.models.boxers_model import Boxers
+
+from weatherFolder.models.favorites_model import FavoritesModel
+from weatherFolder.models.cities_model import Cities
 
 
 @pytest.fixture
-def ring_model():
+def favorites_model():
     """Fixture to provide a new instance of RingModel for each test.
 
     """
-    return RingModel()
+    return FavoritesModel()
 
 # Fixtures providing sample boxers
 @pytest.fixture
@@ -42,9 +45,10 @@ def sample_boxer2(session):
     session.commit()
     return boxer
 
+#was sample_boxers
 @pytest.fixture
-def sample_boxers(sample_boxer1, sample_boxer2):
-    return [sample_boxer1, sample_boxer2]
+def sample_cities(sample_city1, sample_city2):
+    return [sample_city1, sample_city2]
 
 
 ##########################################################
@@ -74,27 +78,28 @@ def test_clear_ring_empty(ring_model, caplog):
     assert "Attempted to clear an empty ring." in caplog.text, "Expected a warning when clearing an empty ring."
 
 # was test_get_boxers_empty
-def test_get_boxers_empty(ring_model, caplog):
+def test_get_cities_empty(favorites_model, caplog):
     """Test that get_boxers returns an empty list when there are no boxers and logs a warning.
 
     """
     with caplog.at_level("WARNING"):
-        boxers = ring_model.get_boxers()
+        cities = favorites_model.get_all_cities_and_weather()
 
-    assert boxers == [], "Expected get_boxers to return an empty list when there are no boxers."
+    assert cities == [], "Expected get_boxers to return an empty list when there are no boxers."
 
     assert "Retrieving boxers from an empty ring." in caplog.text, "Expected a warning when getting boxers from an empty ring."
 
-def test_get_boxers_with_data(app, ring_model, sample_boxers):
+# test_get_boxers_with_data
+def test_get_cities_with_data(app, favorites_model, sample_cities):
     """Test that get_boxers returns the correct list when there are boxers.
 
     # Note that app is a fixture defined in the conftest.py file
 
     """
-    ring_model.ring.extend([boxer.id for boxer in sample_boxers])
+    #favorites_model.ring.extend([boxer.id for boxer in sample_boxers])
 
-    boxers = ring_model.get_boxers()
-    assert boxers == sample_boxers, "Expected get_boxers to return the correct boxers list."
+    boxers = favorites_model.get_boxers()
+    assert boxers == sample_cities, "Expected get_boxers to return the correct boxers list."
 
 def test_get_boxers_uses_cache(ring_model, sample_boxer1, mocker):
     ring_model.ring.append(sample_boxer1.id)
