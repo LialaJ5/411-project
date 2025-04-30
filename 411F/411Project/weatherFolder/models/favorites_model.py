@@ -88,7 +88,7 @@ class FavoritesModel:
         weather = city.get_weather()
         return weather
 
-    """
+    
     #formerly get_boxers
     def get_all_cities_and_weather(self) -> List[str,str]:
         "Retrieves the current list of cities in the list.
@@ -120,10 +120,6 @@ class FavoritesModel:
         logger.info(f"Retrieved {len(cities)} boxers from the ring.")
         return cities
 
-    """
-
-    """
-
     def get_fighting_skill(self, boxer: Boxers) -> float:
         "Calculates the fighting skill for a boxer based on arbitrary rules.
 
@@ -147,7 +143,6 @@ class FavoritesModel:
 
         logger.info(f"Fighting skill for {boxer.name}: {skill:.3f}")
         return skill
-    """
-
+    
     def get_forecast_city(self, city_id) -> None:
         return False
