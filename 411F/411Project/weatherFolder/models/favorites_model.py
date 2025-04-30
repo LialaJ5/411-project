@@ -79,7 +79,7 @@ class FavoritesModel:
     def get_weather_city(self, city_id) -> None:
 
     #formerly get_boxers
-    def get_all_cities_and_weather(self) -> List[Cities]:
+    def get_all_cities_and_weather(self) -> List[str,str]:
         """Retrieves the current list of cities in the list.
 
         Returns:
@@ -91,19 +91,20 @@ class FavoritesModel:
         else:
             logger.info(f"Retrieving {len(self.favorites)} cities from the list.")
 
-        now = time.time()
-        cities: List[Cities] = []
+        #now = time.time()
+        cities: List[str,str] = []
 
         for city_id in self.favorites:
-            expired = city_id not in self._ttl or now > self._ttl[city_id]
-            if expired:
-                logger.info(f"TTL expired or missing for boxer {city_id}. Refreshing from DB.")
-                city = Cities.get_city_by_id(city_id)
-                self._boxer_cache[city_id] = city
-                self._ttl[city_id] = now + self.ttl_seconds
-            else:
-                logger.debug(f"Using cached boxer {city_id} (TTL valid).")
-            cities.append(self._boxer_cache[city_id])
+            #expired = city_id not in self._ttl or now > self._ttl[city_id]
+            #if expired:
+            #    logger.info(f"TTL expired or missing for boxer {city_id}. Refreshing from DB.")
+            city = Cities.get_city_by_id(city_id)
+            weather = Cities.getWeather(city_id)
+            #    self._boxer_cache[city_id] = city
+            #   self._ttl[city_id] = now + self.ttl_seconds
+            #else:
+            #    logger.debug(f"Using cached boxer {city_id} (TTL valid).")
+            cities.append(city,weather)
 
         logger.info(f"Retrieved {len(cities)} boxers from the ring.")
         return cities
