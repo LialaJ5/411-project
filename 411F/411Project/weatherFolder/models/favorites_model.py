@@ -39,55 +39,34 @@ class FavoritesModel:
         self.ttl_seconds = int(os.getenv("TTL", 60))
         """
 
-
         self.favorites: List[int] = []
 
-    def clear_ring(self):
-        """Clears the list of boxers.
-
+#CHANGE (Finish)
+    # Formerly clear_ring
+    def clear_city(self):
+        """Clears the list of cities.
         """
-        if not self.ring:
-            logger.warning("Attempted to clear an empty ring.")
+        if not self.favorites:
+            logger.warning("Attempted to clear an empty favorites.")
             return
-        logger.info("Clearing the boxers from the ring.")
-        self.ring.clear()
+        logger.info("Clearing the cities from the favorites.")
+        self.favorites.clear()
 
-
- #CHANGE
+ #CHANGE (Finish)
     #formerly enter_ring
     def add_to_favorite(self, city_id: int):
-        """Prepares a boxer by adding them to the ring for an upcoming fight.
+        """Adds the specified city (by city ID) to the favorites list.
 
         Args:
-            boxer_id (int): The ID of the boxer to enter the ring.
+            city_id (int): The ID of the city to enter the favorites.
 
         Raises:
-            ValueError: If the ring already has two boxers (fight is full).
-            ValueError: If the boxer ID is invalid or the boxer does not exist.
-
-        """
-        """
-        if len(self.ring) >= 2:
-            logger.error(f"Attempted to add boxer ID {boxer_id} but the ring is full")
-            raise ValueError("Ring is full, cannot add more boxers.")
-
-        try:
-            boxer = Boxers.get_boxer_by_id(boxer_id)
-        except ValueError as e:
-            logger.error(str(e))
-            raise
-
-        logger.info(f"Adding boxer '{boxer.name}' (ID {boxer_id}) to the ring")
-
-        self.ring.append(boxer_id)
-
-        logger.info(f"Current boxers in the ring: {[Boxers.get_boxer_by_id(b).name for b in self.ring]}")
-
+            ValueError: If the City ID is invalid or the city does not exist.
 
         """
         try:
             city = Cities.get_city_by_id(city_id)
-        except:
+        except ValueError as e:
             logger.error(str(e))
             raise
         
@@ -152,15 +131,6 @@ class FavoritesModel:
 
         logger.info(f"Fighting skill for {boxer.name}: {skill:.3f}")
         return skill
-
-    #formerly clear_cache
-    def clear_cities(self):
-        """Clears the local TTL cache of boxer objects.
-
-        """
-        logger.info("Clearing local boxer cache in RingModel.")
-        self._boxer_cache.clear()
-        self._ttl.clear()
 
     def get_forecast_city(self, city_id) -> None:
 
