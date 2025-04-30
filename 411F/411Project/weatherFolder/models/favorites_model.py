@@ -15,29 +15,16 @@ configure_logger(logger)
 
 
 class FavoritesModel:
-    """A class to manage the the ring in which boxers have fights.
+    """A class to manage the list of favorite cities selected by the user.
 
     """
 
- #CHANGE
+ #CHANGE (Finish)
     def __init__(self):
-        """Initializes the RingManager with an empty list of combatants.
-
-        The ring is initially empty, and the boxer cache and time-to-live (TTL) caches are also initialized.
-        The TTL is set to 60 seconds by default, but this can be overridden by setting the TTL_SECONDS environment variable.
-
+        """Initializes the FavoritesModel with an empty list of favorite cities.
+        
         Attributes:
-            ring (List[int]): The list of ids of the boxers in the ring.
-            _boxer_cache (dict[int, Boxers]): A cache to store boxer objects for quick access.
-            _ttl (dict[int, float]): A cache to store the time-to-live for each boxer.
-            ttl_seconds (int): The time-to-live in seconds for the cached boxer objects.
-
-        """
-        """
-        self.ring: List[int] = []
-        self._boxer_cache: dict[int, Boxers] = {}
-        self._ttl: dict[int, float] = {}
-        self.ttl_seconds = int(os.getenv("TTL", 60))
+            favorites (List[int]): A list of city IDs marked as favorites by the user.
         """
 
         self.favorites: List[int] = []
@@ -89,7 +76,6 @@ class FavoritesModel:
         weather = city.get_weather()
         return weather
 
-    
     #formerly get_boxers
     def get_all_cities_and_weather(self) -> List[str,str]:
         """Retrieves the current list of cities in the list.
@@ -120,30 +106,6 @@ class FavoritesModel:
 
         logger.info(f"Retrieved {len(cities)} boxers from the ring.")
         return cities
-
-    def get_fighting_skill(self, boxer: Boxers) -> float:
-        """Calculates the fighting skill for a boxer based on arbitrary rules.
-
-        The fighting skill is computed as:
-        - Multiply the boxer's weight by the number of letters in their name.
-        - Subtract an age modifier (if age < 25, subtract 1; if age > 35, subtract 2).
-        - Add a reach bonus (reach / 10).
-
-        Args:
-            boxer (Boxers): A Boxers dataclass representing the combatant.
-
-        Returns:
-            float: The calculated fighting skill.
-
-        """
-        logger.info(f"Calculating fighting skill for {boxer.name}: weight={boxer.weight}, age={boxer.age}, reach={boxer.reach}")
-
-        # Arbitrary calculations
-        age_modifier = -1 if boxer.age < 25 else (-2 if boxer.age > 35 else 0)
-        skill = (boxer.weight * len(boxer.name)) + (boxer.reach / 10) + age_modifier
-
-        logger.info(f"Fighting skill for {boxer.name}: {skill:.3f}")
-        return skill
     
 #CHANGE (Finish)
     def get_forecast_city(self, city_id: int) -> dict:
