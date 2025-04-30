@@ -73,6 +73,7 @@ def test_clear_ring_empty(ring_model, caplog):
 
     assert "Attempted to clear an empty ring." in caplog.text, "Expected a warning when clearing an empty ring."
 
+# was test_get_boxers_empty
 def test_get_boxers_empty(ring_model, caplog):
     """Test that get_boxers returns an empty list when there are no boxers and logs a warning.
 
