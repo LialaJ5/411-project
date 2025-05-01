@@ -87,7 +87,7 @@ class Cities(db.Model):
         Raises:
             ValueError: If no city with the specified ID exists.
         """
-        city = cls.query.get(city_id)
+        city = db.session.get(cls, city_id)
         if city is None:
             logger.info(f"City with ID {city_id} not found.")
             raise ValueError(f"City with ID {city_id} not found.")
