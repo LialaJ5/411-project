@@ -540,15 +540,15 @@ def create_app(config_class=ProductionConfig):
             if not city:
                 app.logger.warning(f"City '{city_name}' not found.")
                 return make_response(jsonify({
-                    "status": "error"
-                    "message": f"City '{city_name}' not found."
+                    "status": "error",
+                    "message": f"City '{city_name}' not found.",
                 }), 400)
         
             try:
                 favorites_model.add_to_favorites(city.id)
             except ValueError as e:
                 app.logger.warning(f"Cannot enter {city.name}: e")
-                return make_reponse(jsonify({
+                return make_response(jsonify({
                     "status": "error",
                     "message": str(e)
                 }), 400)
@@ -558,15 +558,15 @@ def create_app(config_class=ProductionConfig):
             app.logger.info(f"City '{city_name}' added to favorite. Current cities: {cities}")
 
             return make_response(jsonify({
-                "status": "error"
-                "message": f"City '{city_name} is now in your favorites."
+                "status": "error",
+                "message": f"City '{city_name} is now in your favorites.",
             }), 200)
 
         except Exception as e:
             app.logger.error(f"Failed to add city to your favorites: {e}")
-            return make_response(jsonify({
-                "status": "error"
-                "message": "An internal error occured while entering city in favorite."
+            return make_response (jsonify ({
+                "status": "error",
+                "message": "An internal error occured while entering city in favorite.",
                 "cities": cities
             }), 200)
 
@@ -586,7 +586,7 @@ def create_app(config_class=ProductionConfig):
             500 error if there is an issue retrieving the city from the database.
 
         """
-       try:
+        try:
             app.logger.info("Retrieving weather of city...")
 
             data = request.json()
