@@ -68,7 +68,18 @@ class FavoritesModel:
         logger.info(f"Current cities in the favorites: {[Cities.get_city_by_id(b).name for b in self.favorites]}")
 
     def get_weather_city(self, city_id) -> str:
-        
+        """Get the current weather description for the specified favorite city.
+
+        Args:
+            city_id (int): The ID of the city for which to retrieve current weather.
+
+        Returns:
+            str: A short weather description (e.g., "clear sky", "light rain").
+
+        Raises:
+            ValueError: If the city does not exist.
+            RuntimeError: If there is an error retrieving the weather from the external API.
+        """
         logger.info(f"Getting weather for city with id {city_id}")
         try:
             city = Cities.get_city_by_id(city_id)
