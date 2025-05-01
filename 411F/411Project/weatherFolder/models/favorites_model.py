@@ -57,6 +57,9 @@ class FavoritesModel:
         except ValueError as e:
             logger.error(str(e))
             raise
+        except RuntimeError as e:
+            logger.error(str(e))
+            raise
         
         logger.info(f"Adding city '{city.name}' (ID {city_id}) to the favorites")
 
@@ -70,6 +73,9 @@ class FavoritesModel:
         try:
             city = Cities.get_city_by_id(city_id)
         except ValueError as e:
+            logger.error(str(e))
+            raise
+        except RuntimeError as e:
             logger.error(str(e))
             raise
         

@@ -62,11 +62,11 @@ def test_get_cities_empty(favorites_model):
 
 # test_get_boxers_with_data
 def test_get_cities_with_data(app, favorites_model, sample_cities):
-    """Test that get_boxers returns the correct list when there are boxers.
+    "Test that get_boxers returns the correct list when there are boxers.
 
     # Note that app is a fixture defined in the conftest.py file
 
-    """
+    "
     #favorites_model.ring.extend([boxer.id for boxer in sample_boxers])
 
     city1 = Cities(name="TestCity", lat=10.0, lon=20.0)
