@@ -92,29 +92,6 @@ class Cities(db.Model):
             logger.info(f"City with ID {city_id} not found.")
             raise ValueError(f"City with ID {city_id} not found.")
         return city
-<<<<<<< HEAD
-=======
-    
-    @classmethod
-    def get_city_by_name(cls, name: str) -> "Cities":
-        """Retrieve a city by name.
-
-        Args:
-            name: The name of the city.
-
-        Returns:
-            City: The city instance.
-
-        Raises:
-            ValueError: If the city with the given name does not exist.
-
-        """
-        city = cls.query.filter_by(name=name).first()
-        if city is None:
-            logger.info(f"City '{name}' not found.")
-            raise ValueError(f"City '{name}' not found.")
-        return city
->>>>>>> 2150781 (Updating app.py)
 
  #CHANGE
     def get_weather(self) -> str:
@@ -141,4 +118,3 @@ class Cities(db.Model):
                 logger.info("No weather for that city.")
         except Exception as e:
             raise(f"Error with {e}")
-
