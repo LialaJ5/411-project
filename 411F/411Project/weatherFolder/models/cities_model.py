@@ -15,28 +15,13 @@ configure_logger(logger)
 
 load_dotenv()
 
- #CHANGE
+#CHANGE
 class Cities(db.Model):
-    """Represents a competitive boxer in the system.
+    """Represents a city with geographic coordinates.
 
-    This model maps to the 'boxers' table in the database and stores personal
-    and performance-related attributes such as name, weight, height, reach,
-    age, and fight statistics. Used in a Flask-SQLAlchemy application to
-    manage boxer data, run simulations, and track fight outcomes.
-
-    """
-    """
-    __tablename__ = 'boxers'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String, unique=True, nullable=False)
-    weight = db.Column(db.Float, nullable=False)
-    height = db.Column(db.Float, nullable=False)
-    reach = db.Column(db.Float, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    fights = db.Column(db.Integer, nullable=False, default=0)
-    wins = db.Column(db.Integer, nullable=False, default=0)
-    weight_class = db.Column(db.String)
+    This SQLAlchemy model maps to the 'cities' table in the database and stores
+    essential information such as the city's name, latitude, and longitude.
+    Used for retrieving and displaying location-specific weather data.
     """
     
     __tablename__ = 'cities'
@@ -47,19 +32,12 @@ class Cities(db.Model):
     lon = db.Column(db.Float, nullable=False)
 
     def __init__(self, name: str, lat: float, lon: float):
-        """Initialize a new Boxer instance with basic attributes.
+        """Initializes a new City instance with a name and geographic coordinates.
 
         Args:
-            name (str): The boxer's name. Must be unique.
-            weight (float): The boxer's weight in pounds. Must be at least 125.
-            height (float): The boxer's height in inches. Must be greater than 0.
-            reach (float): The boxer's reach in inches. Must be greater than 0.
-            age (int): The boxer's age. Must be between 18 and 40, inclusive.
-
-        Notes:
-            - The boxer's weight class is automatically assigned based on weight.
-            - Fight statistics (`fights` and `wins`) are initialized to 0 by default in the database schema.
-
+            name (str): The name of the city.
+            lat (float): The latitude of the city.
+            lon (float): The longitude of the city.
         """
         self.name = name
         self.lat = lat
@@ -69,48 +47,16 @@ class Cities(db.Model):
  #CHANGE
     @classmethod
     def create_city(cls, name: str, lat: float, lon: float) -> None:
-        """Create and persist a new Boxer instance.
+        """Creates and saves a new city record to the database.
 
         Args:
-            name: The name of the boxer.
-            weight: The weight of the boxer.
-            height: The height of the boxer.
-            reach: The reach of the boxer.
-            age: The age of the boxer.
+            name (str): The name of the city.
+            lat (float): The latitude of the city.
+            lon (float): The longitude of the city.
 
         Raises:
-            IntegrityError: If a boxer with the same name already exists.
-            ValueError: If the weight is less than 125 or if any of the input parameters are invalid.
-            SQLAlchemyError: If there is a database error during creation.
-
-        """
-
-        """
-        logger.info(f"Creating boxer: {name}, {lat=} {lon=}")
-
-        if weight < 125:
-            raise ValueError("Weight must be at least 125.")
-        if height <= 0:
-            raise ValueError("Height must be greater than 0.")
-        if reach <= 0:
-            raise ValueError("Reach must be greater than 0.")
-        if not (18 <= age <= 40):
-            raise ValueError("Age must be between 18 and 40.")
-
-        try:
-            boxer = cls(name=name, weight=weight, height=height, reach=reach, age=age)
-            db.session.add(boxer)
-            db.session.commit()
-            logger.info(f"Boxer created successfully: {name}")
-        except IntegrityError:
-            db.session.rollback()
-            logger.error(f"Boxer with name '{name}' already exists.")
-            raise ValueError(f"Boxer with name '{name}' already exists.")
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logger.error(f"Database error during creation: {e}")
-            raise
-        
+            ValueError: If a city with the same name already exists.
+            SQLAlchemyError: If a database error occurs during creation.
         """
         logger.info(f"Creating boxer: {name}, {lat=} {lon=}")
         try:
@@ -127,69 +73,36 @@ class Cities(db.Model):
             logger.error(f"Database error during creation: {e}")
             raise
 
-
+ #CHANGE
     @classmethod
     def get_city_by_id(cls, city_id: int) -> "Cities":
-        """Retrieve a boxer by ID.
+        """Retrieves a city from the database by its ID.
 
         Args:
-            boxer_id: The ID of the boxer.
+            city_id (int): The ID of the city to retrieve.
 
         Returns:
-            Boxer: The boxer instance.
+            Cities: The corresponding city instance.
 
         Raises:
-            ValueError: If the boxer with the given ID does not exist.
-
+            ValueError: If no city with the specified ID exists.
         """
         city = cls.query.get(city_id)
         if city is None:
             logger.info(f"City with ID {city_id} not found.")
             raise ValueError(f"City with ID {city_id} not found.")
         return city
-    
-    @classmethod
-    def get_boxer_by_name(cls, name: str) -> "Boxers":
-        """Retrieve a boxer by name.
-
-        Args:
-            name: The name of the boxer.
-
-        Returns:
-            Boxer: The boxer instance.
-
-        Raises:
-            ValueError: If the boxer with the given name does not exist.
-
-        """
-        boxer = cls.query.filter_by(name=name).first()
-        if boxer is None:
-            logger.info(f"Boxer '{name}' not found.")
-            raise ValueError(f"Boxer '{name}' not found.")
-        return boxer
 
  #CHANGE
     def get_weather(self) -> str:
-        """Delete a boxer by ID.
+        """Fetches the current weather description for this city using its coordinates.
 
-        Args:
-            boxer_id: The ID of the boxer to delete.
+        Returns:
+            str: A short textual description of the current weather (e.g., "clear sky").
 
         Raises:
-            ValueError: If the boxer with the given ID does not exist.
-
+            Exception: If the weather API request fails or an error occurs during retrieval.
         """
-        """
-        boxer = cls.get_boxer_by_id(boxer_id)
-        if boxer is None:
-            logger.info(f"Boxer with ID {boxer_id} not found.")
-            raise ValueError(f"Boxer with ID {boxer_id} not found.")
-        db.session.delete(boxer)
-        db.session.commit()
-        logger.info(f"Boxer with ID {boxer_id} permanently deleted.")
-        """
-
-
         try:
             key = os.getenv("WEATHER_KEY")
 
