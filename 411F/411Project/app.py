@@ -410,13 +410,13 @@ def create_app(config_class=ProductionConfig):
             }), 500)
 
 
-    @app.route('/api/get-boxer-by-id/<int:boxer_id>', methods=['GET'])
+    @app.route('/api/get-city-by-id/<int:city_id>', methods=['GET'])
     @login_required
-    def get_boxer_by_id(boxer_id: int) -> Response:
+    def get_city_by_id(city_id: int) -> Response:
         """Route to get a boxer by its ID.
 
         Path Parameter:
-            - boxer_id (int): The ID of the boxer.
+            - city_id (int): The ID of the boxer.
 
         Returns:
             JSON response containing the boxer details if found.
@@ -427,28 +427,28 @@ def create_app(config_class=ProductionConfig):
 
         """
         try:
-            app.logger.info(f"Received request to retrieve boxer with ID {boxer_id}")
+            app.logger.info(f"Received request to retrieve city with ID {city_id}")
 
-            boxer = Boxers.get_boxer_by_id(boxer_id)
+            city = Cities.get_city_by_id(city_id)
 
-            if not boxer:
-                app.logger.warning(f"Boxer with ID {boxer_id} not found.")
+            if not city:
+                app.logger.warning(f"City with ID {city_id} not found.")
                 return make_response(jsonify({
                     "status": "error",
-                    "message": f"Boxer with ID {boxer_id} not found"
+                    "message": f"City with ID {city_id} not found"
                 }), 400)
 
-            app.logger.info(f"Successfully retrieved boxer: {boxer}")
+            app.logger.info(f"Successfully retrieved city: {city}")
             return make_response(jsonify({
                 "status": "success",
-                "boxer": boxer
+                "city": city
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Error retrieving boxer with ID {boxer_id}: {e}")
+            app.logger.error(f"Error retrieving city with ID {city_id}: {e}")
             return make_response(jsonify({
                 "status": "error",
-                "message": "An internal error occurred while retrieving the boxer",
+                "message": "An internal error occurred while retrieving the city",
                 "details": str(e)
             }), 500)
 
@@ -502,7 +502,58 @@ def create_app(config_class=ProductionConfig):
     #
     ############################################################
 
+    @app.route('/api/add-to-favorite', methods=['POST'])
+    @login_required
+    def add_to_favorite() -> Response:
+        try:
+            app.logger.info("")
+            data = request.json()
+            city_name = data.get("name")
 
+        if not city_name:
+            app.logger.warning("Attempted to add a city wuthout specifying name.")
+            return make_response(jsonify({
+                "status":  "error",
+                "message": "You must name a city."
+            }), 400)
+
+        app.logger.info(f"Attempting to add city {city_name} to favorites.")
+
+        city = Cities.get_city_by_name(city_name)
+
+        if not city:
+            app.logger.warning(f"City '{city_name}' not found.")
+            return make_response(jsonify({
+                "status": "error"
+                "message": f"City '{city_name}' not found."
+            }), 400)
+        
+        try:
+            favorites_model.add_to_favorites(city.id)
+        except ValueError as e:
+            app.logger.warning(f"Cannot enter {city.name}: e")
+            return make_reponse(jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 400)
+        
+        cities = [Cities.get_city_by_id(b) for b in favorites_model.favorites]
+
+        app.logger.info(f"City '{city_name}' added to favorite. Current cities: {cities}")
+
+        return make_response(jsonify({
+            "status": "error"
+            "message": f"City '{city_name} is now in your favorites."
+        }), 200)
+
+    except Exception as e:
+        app.logger.error(f"Failed to add city to your favorites: {e}")
+        return make_response(jsonify({
+            "status": "error"
+            "message": "An internal error occured while entering city in favorite."
+            "cities": cities
+        }), 200)
+"""
     @app.route('/api/fight', methods=['GET'])
     @login_required
     def bout() -> Response:
@@ -574,6 +625,7 @@ def create_app(config_class=ProductionConfig):
                 "message": "An internal error occurred while clearing boxers",
                 "details": str(e)
             }), 500)
+"""
 
 
     @app.route('/api/enter-ring', methods=['POST'])
