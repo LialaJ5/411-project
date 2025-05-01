@@ -13,7 +13,6 @@ def favorites_model():
 @pytest.fixture
 def sample_city1(session):
     city = Cities(
-        id = 4930956,
         name="Boston",
         lat=52.97,
         lon=-0.02,
@@ -25,7 +24,6 @@ def sample_city1(session):
 @pytest.fixture
 def sample_city2(session):
     city = Cities(
-        id = 3165523,
         name="Province of Turin",
         lat=45.133,
         lon=7.367,
@@ -61,19 +59,29 @@ def test_get_cities_empty(favorites_model):
     #assert "Retrieving boxers from an empty ring." in caplog.text, "Expected a warning when getting boxers from an empty ring."
 
 # test_get_boxers_with_data
-def test_get_cities_with_data(app, favorites_model, sample_cities):
-    "Test that get_boxers returns the correct list when there are boxers.
+def test_get_cities_with_data(favorites_model, sample_city1, sample_city2):
+    "Test that get_boxers returns the correct list when there are boxers."
 
     # Note that app is a fixture defined in the conftest.py file
 
-    "
     #favorites_model.ring.extend([boxer.id for boxer in sample_boxers])
+    cities = [sample_city1.id, sample_city2.id]
+    favorites_model.favorites = cities
+    with patch("weatherFolder.models.cities_model.Cities.get_city_by_id", return_value=cities), \
+         patch("requests.get") as mock_get, \
+         patch("os.getenv", return_value="fake-key"):
 
-    city1 = Cities(name="TestCity", lat=10.0, lon=20.0)
-    city1.id = 1
-
-    city2 = Cities(name="TestCity2", lat=20.0, lon=40.0)
-    city2.id = 2
-
-    favorites_model.favorites = [1,2]
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "list": [
+                {
+                    "dt_txt": "2025-04-30 12:00:00",
+                    "main": {"temp_max": 25, "temp_min": 15},
+                    "pop": 0.1,
+                    "weather": [{"description": "clear sky"}]
+                }
+            ]
+        }
+        mock_get.return_value = mock_response
     assert favorites_model.get_all_cities_and_weather() == [("TestCity", "broken clouds" ),("TestCity2", "broken clouds")], "Expected get_boxers to return the correct boxers list."
