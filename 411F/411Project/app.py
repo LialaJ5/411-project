@@ -262,17 +262,17 @@ def create_app(config_class=ProductionConfig):
     # Boxers
     #
     ##########################################################
-
+    """
     @app.route('/api/reset-boxers', methods=['DELETE'])
     def reset_boxers() -> Response:
-        """Recreate the boxers table to delete boxers users.
+        "Recreate the boxers table to delete boxers users.
 
         Returns:
             JSON response indicating the success of recreating the Boxers table.
 
         Raises:
             500 error if there is an issue recreating the Boxers table.
-        """
+        "
         try:
             app.logger.info("Received request to recreate Boxers table")
             with app.app_context():
@@ -291,12 +291,13 @@ def create_app(config_class=ProductionConfig):
                 "message": "An internal error occurred while deleting users",
                 "details": str(e)
             }), 500)
+    """
 
-
+    """
     @app.route('/api/add-boxer', methods=['POST'])
     @login_required
     def add_boxer() -> Response:
-        """Route to add a new boxer to the gym.
+        "Route to add a new boxer to the gym.
 
         Expected JSON Input:
             - name (str): The boxer's name.
@@ -312,7 +313,7 @@ def create_app(config_class=ProductionConfig):
             400 error if input validation fails.
             500 error if there is an issue adding the boxer to the database.
 
-        """
+        "
         app.logger.info("Received request to create new boxer")
 
         try:
@@ -368,7 +369,7 @@ def create_app(config_class=ProductionConfig):
     @app.route('/api/delete-boxer/<int:boxer_id>', methods=['DELETE'])
     @login_required
     def delete_boxer(boxer_id: int) -> Response:
-        """Route to delete a boxer by ID.
+        "Route to delete a boxer by ID.
 
         Path Parameter:
             - boxer_id (int): The ID of the boxer to delete.
@@ -380,7 +381,7 @@ def create_app(config_class=ProductionConfig):
             400 error if the boxer does not exist.
             500 error if there is an issue removing the boxer from the database.
 
-        """
+        "
         try:
             app.logger.info(f"Received request to delete boxer with ID {boxer_id}")
 
@@ -408,22 +409,22 @@ def create_app(config_class=ProductionConfig):
                 "message": "An internal error occurred while deleting the boxer",
                 "details": str(e)
             }), 500)
-
+    """
 
     @app.route('/api/get-city-by-id/<int:city_id>', methods=['GET'])
     @login_required
     def get_city_by_id(city_id: int) -> Response:
-        """Route to get a boxer by its ID.
+        """Route to get a city by its id.
 
         Path Parameter:
             - city_id (int): The ID of the boxer.
 
         Returns:
-            JSON response containing the boxer details if found.
+            JSON response containing the city details if found.
 
         Raises:
-            400 error if the boxer is not found.
-            500 error if there is an issue retrieving the boxer from the database.
+            400 error if the city is not found.
+            500 error if there is an issue retrieving the city from the database.
 
         """
         try:
@@ -452,11 +453,11 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
+    """
     @app.route('/api/get-boxer-by-name/<string:boxer_name>', methods=['GET'])
     @login_required
     def get_boxer_by_name(boxer_name: str) -> Response:
-        """Route to get a boxer by its name.
+        "Route to get a boxer by its name.
 
         Path Parameter:
             - boxer_name (str): The name of the boxer.
@@ -468,7 +469,7 @@ def create_app(config_class=ProductionConfig):
             400 error if the boxer name is missing or not found.
             500 error if there is an issue retrieving the boxer from the database.
 
-        """
+        "
         try:
             app.logger.info(f"Received request to retrieve boxer with name '{boxer_name}'")
 
@@ -495,6 +496,8 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
+    """
+
 
     ############################################################
     #
@@ -502,62 +505,250 @@ def create_app(config_class=ProductionConfig):
     #
     ############################################################
 
-    @app.route('/api/add-to-favorite', methods=['POST'])
+    @app.route('/api/add-to-favorite/<int:city_id>', methods=['POST'])
     @login_required
-    def add_to_favorite() -> Response:
+    def add_to_favorite(city_id: int) -> Response:
+        """Route to add a city to model favorites.
+
+        Path Parameter:
+            - city_id (int): The ID of the city.
+
+        Returns:
+            JSON response indicating success of the operation.
+
+        Raises:
+            400 error if the city is not found.
+            500 error if there is an issue retrieving the city from the database.
+
+        """
         try:
             app.logger.info("")
             data = request.json()
             city_name = data.get("name")
 
-        if not city_name:
-            app.logger.warning("Attempted to add a city wuthout specifying name.")
-            return make_response(jsonify({
-                "status":  "error",
-                "message": "You must name a city."
-            }), 400)
+            if not city_name:
+                app.logger.warning("Attempted to add a city wuthout specifying name.")
+                return make_response(jsonify({
+                    "status":  "error",
+                    "message": "You must name a city."
+                }), 400)
 
-        app.logger.info(f"Attempting to add city {city_name} to favorites.")
+            app.logger.info(f"Attempting to add city {city_name} to favorites.")
 
-        city = Cities.get_city_by_name(city_name)
+            city = Cities.get_city_by_name(city_name)
 
-        if not city:
-            app.logger.warning(f"City '{city_name}' not found.")
+            if not city:
+                app.logger.warning(f"City '{city_name}' not found.")
+                return make_response(jsonify({
+                    "status": "error"
+                    "message": f"City '{city_name}' not found."
+                }), 400)
+        
+            try:
+                favorites_model.add_to_favorites(city.id)
+            except ValueError as e:
+                app.logger.warning(f"Cannot enter {city.name}: e")
+                return make_reponse(jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 400)
+        
+            cities = [Cities.get_city_by_id(b) for b in favorites_model.favorites]
+
+            app.logger.info(f"City '{city_name}' added to favorite. Current cities: {cities}")
+
             return make_response(jsonify({
                 "status": "error"
-                "message": f"City '{city_name}' not found."
-            }), 400)
+                "message": f"City '{city_name} is now in your favorites."
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to add city to your favorites: {e}")
+            return make_response(jsonify({
+                "status": "error"
+                "message": "An internal error occured while entering city in favorite."
+                "cities": cities
+            }), 200)
+
+    @app.route('/api/get-weather-city/<int:city_id>', methods=['GET'])
+    @login_required
+    def get_weather_city(city_id: int) -> Response:
+        """Route to get the weather of city by its ID.
+
+        Path Parameter:
+            - city_id (int): The ID of the boxer.
+
+        Returns:
+            JSON response containing the weather details if found.
+
+        Raises:
+            400 error if the city is not found.
+            500 error if there is an issue retrieving the city from the database.
+
+        """
+       try:
+            app.logger.info("Retrieving weather of city...")
+
+            data = request.json()
+            city_id = data.get("id")
+
+            if not city_id:
+                app.logger.warning("Attempted to retrieve weather without giving city.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "You must give city id"
+                }), 400)
+            
+            app.logger.info(f"Attempting to retrieve city '{city_id}' weather.")
+
+            try:
+                weather = Cities.get_weather_city(city_id)
+            except ValueError as e:
+                app.logger.warning(f"Cannot retrieve {city_id}: {e}")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 400)
+            
+            app.logger.info(f"Retrieved weather of city {city_id}.")
+            
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"City '{city_id}' weather is.",
+                "weather": weather
+            }), 200)
         
-        try:
-            favorites_model.add_to_favorites(city.id)
-        except ValueError as e:
-            app.logger.warning(f"Cannot enter {city.name}: e")
-            return make_reponse(jsonify({
+        except Exception as e:
+            app.logger.error(f"Failed to retrieve weather of the city: {e}")
+            return make_response(jsonify({
                 "status": "error",
-                "message": str(e)
-            }), 400)
+                "message": "An internal error occurred retrieving weather of city",
+                "details": str(e)
+            }), 500)
+    
+    @app.route('/api/clear-favorites', methods=['POST'])
+    @login_required
+    def clear_favorites() -> Response:
+        """Route to clear the list of cities from model favorites.
+
+        Returns:
+            JSON response indicating success of the operation.
+
+        Raises:
+            500 error if there is an issue clearing cities.
+
+        """
+        try:
+            app.logger.info("Clearing favorite cities...")
+
+            favorites_model.clear_favorites()
+
+            app.logger.info("Cities cleared from favorites successfully.")
+            return make_response(jsonify({
+                "status": "success",
+                "message": "Cities have been cleared from favorites."
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to clear city: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while clearing cities",
+                "details": str(e)
+            }), 500)
+
+    @app.route('/api/get-forecast-city/<int:city_id>', methods=['POST'])
+    @login_required
+    def get_forecast_city(city_id: int) -> Response:
+        """Route to get the forecast of a city.
+
+        Path Parameter:
+            - city_id (int): The ID of the city.
+
+        Returns:
+            JSON response containing the city forecast details if found.
+
+        Raises:
+            400 error if the city is not found.
+            500 error if there is an issue retrieving the city from the database.
+
+        """
+        try:
+            app.logger.info("Retrieving forecast of city...")
+
+            data = request.json()
+            city_id = data.get("id")
+
+            if not city_id:
+                app.logger.warning("Attempting to retrieve forecast without the city")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "You must give an id."
+                }), 400)
+            
+            app.logger.info(f"Attempting to retrieve forecast of city {city_id}.")
+
+            try:
+                forecast = Cities.get_forecast_city(city_id)
+            except ValueError as e:
+                app.logger.warning(f"Could not get city with id {city_id}.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 400)
+            
+            app.logger.info("Retrieved forecast of city.")
+
+            return make_response(jsonify({
+                "status": "success",
+                "forecast": forecast
+            }), 200)
         
-        cities = [Cities.get_city_by_id(b) for b in favorites_model.favorites]
+        except Exception as e:
+            app.logger.error(f"Failed to retrieve the foreacast: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while retrieving forecast.",
+                "details": str(e)
+            }), 500)
+    
+    @app.route('/api/get-all_cities_and_weather', methods=['GET'])
+    @login_required
+    def get_all_cities_and_weather() -> Response:
+        """Route to get the list of cities and their weathers.
 
-        app.logger.info(f"City '{city_name}' added to favorite. Current cities: {cities}")
+        Returns:
+            JSON response with the list of cities and weathers.
 
-        return make_response(jsonify({
-            "status": "error"
-            "message": f"City '{city_name} is now in your favorites."
-        }), 200)
+        Raises:
+            500 error if there is an issue getting the cities.
 
-    except Exception as e:
-        app.logger.error(f"Failed to add city to your favorites: {e}")
-        return make_response(jsonify({
-            "status": "error"
-            "message": "An internal error occured while entering city in favorite."
-            "cities": cities
-        }), 200)
-"""
+        """
+        try:
+            app.logger.info("Retrieving all cities with weathers")
+
+            cities_weathers = favorites_model.get_all_cities_and_weather()
+
+            app.logger.info("Retrieved all cities and with their corresponding weather.")
+            
+            return make_response(jsonify({
+                "status": "successs",
+                "cities_weathers": cities_weathers
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to retrieve cities with weather: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while retrieving cities.",
+                "details": str(e)
+            }), 500)
+
+    """
     @app.route('/api/fight', methods=['GET'])
     @login_required
     def bout() -> Response:
-        """Route that triggers the fight between the two current boxers.
+        "Route that triggers the fight between the two current boxers.
 
         Returns:
             JSON response indicating the winner of the fight.
@@ -566,7 +757,7 @@ def create_app(config_class=ProductionConfig):
             400 error if the fight cannot be triggered due to insufficient combatants.
             500 error if there is an issue during the fight.
 
-        """
+        "
         try:
             app.logger.info("Initiating fight...")
 
@@ -593,12 +784,13 @@ def create_app(config_class=ProductionConfig):
                 "message": "An internal error occurred while triggering the fight",
                 "details": str(e)
             }), 500)
-
+    """
+    """
 
     @app.route('/api/clear-boxers', methods=['POST'])
     @login_required
     def clear_boxers() -> Response:
-        """Route to clear the list of boxers from the ring.
+        "Route to clear the list of boxers from the ring.
 
         Returns:
             JSON response indicating success of the operation.
@@ -606,7 +798,7 @@ def create_app(config_class=ProductionConfig):
         Raises:
             500 error if there is an issue clearing boxers.
 
-        """
+        "
         try:
             app.logger.info("Clearing all boxers...")
 
@@ -625,13 +817,14 @@ def create_app(config_class=ProductionConfig):
                 "message": "An internal error occurred while clearing boxers",
                 "details": str(e)
             }), 500)
-"""
+    """
+    """
 
 
     @app.route('/api/enter-ring', methods=['POST'])
     @login_required
     def enter_ring() -> Response:
-        """Route to have a boxer enter the ring for the next fight.
+        "Route to have a boxer enter the ring for the next fight.
 
         Expected JSON Input:
             - name (str): The boxer's name.
@@ -643,7 +836,7 @@ def create_app(config_class=ProductionConfig):
             400 error if the request is invalid (e.g., boxer name missing or too many boxers in the ring).
             500 error if there is an issue with the boxer entering the ring.
 
-        """
+        "
         try:
             data = request.get_json()
             boxer_name = data.get("name")
@@ -697,7 +890,7 @@ def create_app(config_class=ProductionConfig):
     @app.route('/api/get-boxers', methods=['GET'])
     @login_required
     def get_boxers() -> Response:
-        """Route to get the list of boxers in the ring.
+        "Route to get the list of boxers in the ring.
 
         Returns:
             JSON response with the list of boxers.
@@ -705,7 +898,7 @@ def create_app(config_class=ProductionConfig):
         Raises:
             500 error if there is an issue getting the boxers.
 
-        """
+        "
         try:
             app.logger.info("Retrieving list of boxers...")
 
@@ -735,7 +928,7 @@ def create_app(config_class=ProductionConfig):
 
     @app.route('/api/leaderboard', methods=['GET'])
     def get_leaderboard() -> Response:
-        """Route to get the leaderboard of boxers sorted by wins or win percentage.
+        "Route to get the leaderboard of boxers sorted by wins or win percentage.
 
         Query Parameters:
             - sort (str): The field to sort by ('wins', or 'win_pct'). Default is 'wins'.
@@ -747,7 +940,7 @@ def create_app(config_class=ProductionConfig):
             400 error if an invalid sort parameter is provided.
             500 error if there is an issue generating the leaderboard.
 
-        """
+        "
         try:
             # Get the sort parameter from the query string, default to 'wins'
             sort_by = request.args.get('sort', 'wins').lower()
@@ -782,6 +975,7 @@ def create_app(config_class=ProductionConfig):
 
     return app
 
+"""
 
 if __name__ == '__main__':
     app = create_app()
