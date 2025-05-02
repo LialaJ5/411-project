@@ -972,10 +972,9 @@ def create_app(config_class=ProductionConfig):
                 "message": "An internal error occurred while generating the leaderboard",
                 "details": str(e)
             }), 500)
+    """
 
     return app
-
-"""
 
 if __name__ == '__main__':
     app = create_app()
