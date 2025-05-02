@@ -15,7 +15,7 @@ configure_logger(logger)
 
 load_dotenv()
 
-
+#CHANGE
 class Cities(db.Model):
     """Represents a city with geographic coordinates.
 
@@ -44,7 +44,7 @@ class Cities(db.Model):
         self.lon = lon
 
 
- 
+ #CHANGE
     @classmethod
     def create_city(cls, name: str, lat: float, lon: float) -> None:
         """Creates and saves a new city record to the database.
@@ -58,7 +58,7 @@ class Cities(db.Model):
             ValueError: If a city with the same name already exists.
             SQLAlchemyError: If a database error occurs during creation.
         """
-        logger.info(f"Creating city: {name}, {lat=} {lon=}")
+        logger.info(f"Creating boxer: {name}, {lat=} {lon=}")
         try:
             city = cls(name=name, lat=lat, lon=lon)
             db.session.add(city)
@@ -73,7 +73,7 @@ class Cities(db.Model):
             logger.error(f"Database error during creation: {e}")
             raise
 
- 
+ #CHANGE
     @classmethod
     def get_city_by_id(cls, city_id: int) -> "Cities":
         """Retrieves a city from the database by its ID.
@@ -93,7 +93,7 @@ class Cities(db.Model):
             raise ValueError(f"City with ID {city_id} not found.")
         return city
 
- 
+ #CHANGE
     def get_weather(self) -> str:
         """Fetches the current weather description for this city using its coordinates.
 
@@ -117,4 +117,4 @@ class Cities(db.Model):
             else:
                 logger.info("No weather for that city.")
         except Exception as e:
-            raise(f"Error with {e}")
+            raise Exception(f"Error with {e}")

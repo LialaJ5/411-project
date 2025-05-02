@@ -19,7 +19,7 @@ class FavoritesModel:
 
     """
 
- 
+ #CHANGE (Finish)
     def __init__(self):
         """Initializes the FavoritesModel with an empty list of favorite cities.
         
@@ -29,7 +29,8 @@ class FavoritesModel:
 
         self.favorites: List[int] = []
 
-
+#CHANGE (Finish)
+    # Formerly clear_ring
     def clear_favorites(self):
         """Clears the list of cities.
         """
@@ -39,7 +40,8 @@ class FavoritesModel:
         logger.info("Clearing the cities from the favorites.")
         self.favorites.clear()
 
-
+ #CHANGE (Finish)
+    #formerly enter_ring
     def add_to_favorite(self, city_id: int):
         """Adds the specified city (by city ID) to the favorites list.
 
@@ -91,7 +93,7 @@ class FavoritesModel:
         weather = city.get_weather()
         return weather
 
-
+    #formerly get_boxers
     def get_all_cities_and_weather(self):
         """Retrieves the current list of cities in the list.
 
@@ -104,25 +106,17 @@ class FavoritesModel:
         else:
             logger.info(f"Retrieving {len(self.favorites)} cities from the list.")
 
-        #now = time.time()
         cities = []
 
         for city_id in self.favorites:
-            #expired = city_id not in self._ttl or now > self._ttl[city_id]
-            #if expired:
-            #    logger.info(f"TTL expired or missing for boxer {city_id}. Refreshing from DB.")
             city = Cities.get_city_by_id(city_id)
-            weather = Cities.get_weather(city_id)
-            #    self._boxer_cache[city_id] = city
-            #   self._ttl[city_id] = now + self.ttl_seconds
-            #else:
-            #    logger.debug(f"Using cached boxer {city_id} (TTL valid).")
+            weather = city.get_weather()
             cities.append((city,weather))
 
-        logger.info(f"Retrieved {len(cities)} cities from favorites.")
+        logger.info(f"Retrieved {len(cities)} boxers from the ring.")
         return cities
     
-
+#CHANGE (Finish)
     def get_forecast_city(self, city_id: int) -> dict:
         """Get the weather forecast for the specified favorite city.
 
