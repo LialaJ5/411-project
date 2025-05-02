@@ -93,7 +93,6 @@ class Cities(db.Model):
             raise ValueError(f"City with ID {city_id} not found.")
         return city
 
-
  #CHANGE
     def get_weather(self) -> str:
         """Fetches the current weather description for this city using its coordinates.
