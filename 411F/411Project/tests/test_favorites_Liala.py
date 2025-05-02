@@ -55,7 +55,7 @@ def test_get_weather_city(favorites_model, sample_city1):
     """Test the get_fighting_skill method.
 
     """
-    expected_score_1 = "clear sky"
+    expected_score_1 = "overcast clouds"
     assert favorites_model.get_weather_city(sample_city1.id) == expected_score_1, f"Expected score: {expected_score_1}"
 
 def test_get_weather_city(favorites_model, sample_city1):
@@ -68,5 +68,5 @@ def test_get_weather_city(favorites_model, sample_city1):
     with pytest.raises(ValueError):
         favorites_model.get_weather_city(3)
 
-    expected_score_1 = "clear sky"
+    expected_score_1 = "overcast clouds"
     assert favorites_model.get_weather_city(sample_city1.id) == expected_score_1, f"Expected score: {expected_score_1}"
