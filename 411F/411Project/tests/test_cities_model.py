@@ -4,15 +4,17 @@ import pytest
 
 from weatherFolder.models.cities_model import Cities
 
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
 # --- Fixtures ---
 
 @pytest.fixture
 def city_Boston(session):
     """Fixture for Muhammad Ali."""
-    boxer = Boxers(name="Boston", lat=52.97, lon=-0.02)
-    session.add(boxer)
+    city = Cities(name="Boston", lat=52.97, lon=-0.02)
+    session.add(city)
     session.commit()
-    return boxer
+    return city
 
 """
 @pytest.fixture
@@ -28,13 +30,13 @@ def boxer_tyson(session):
 
 def test_create_city(session):
     """Test creating a new city."""
-    CIties.create_city("Alberta", lat=36.86, lon=-112.62)
+    Cities.create_city("Alberta", lat=36.86, lon=-112.62)
     city = session.query(Cities).filter_by(name="Alberta").first()
     assert city is not None
 
 
-def test_create_city_duplicate_name(session, boxer_ali):
+def test_create_city_duplicate_name(session, city_Boston):
     """Test creating a boxer with a duplicate name."""
-    with pytest.raises(ValueError, match="already exists"):
-        Boxers.create_boxer("Boston",52.97, -0.02)
+    with pytest.raises(ValueError):
+        Cities.create_city("Boston",52.97, -0.02)
 
