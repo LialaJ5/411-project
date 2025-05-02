@@ -2,229 +2,193 @@ import time
 
 import pytest
 
-#from boxing.models.ring_model import RingModel
-#from boxing.models.boxers_model import Boxers
-
 from weatherFolder.models.favorites_model import FavoritesModel
 from weatherFolder.models.cities_model import Cities
-
+from unittest.mock import patch, MagicMock
 
 @pytest.fixture
 def favorites_model():
-    """Fixture to provide a new instance of RingModel for each test.
+    """Fixture to provide a new instance of FavoritesModel for each test.
 
     """
     return FavoritesModel()
 
 # Fixtures providing sample boxers
 @pytest.fixture
-def sample_boxer1(session):
-    boxer = Boxers(
-        name="Muhammad Ali",
-        weight=210,
-        height=191,
-        reach=78,
-        age=32
+def sample_city1(session):
+    city = Cities(
+        name="Boston",
+        lat=52.97,
+        lon=-0.02,
     )
-    # now we need to not only create the boxer but also add it to the database
-    # and commit the session to persist the changes
-    session.add(boxer)
+    session.add(city)
     session.commit()
-    return boxer
+    return city
 
 @pytest.fixture
-def sample_boxer2(session):
-    boxer = Boxers(
-        name="Mike Tyson",
-        weight=220,
-        height=178,
-        reach=71,
-        age=24
+def sample_city2(session):
+    city = Cities(
+        name="Province of Turin",
+        lat=45.133,
+        lon=7.367,
     )
-    session.add(boxer)
+    session.add(city)
     session.commit()
-    return boxer
+    return city
 
 #was sample_boxers
 @pytest.fixture
-def sample_cities(sample_city1, sample_city2):
-    return [sample_city1, sample_city2]
+def sample_cities(session):
+    cities = [sample_city1,sample_city2]
+    return cities
+
+def sample_cities_empty(session):
+    cities = []
+    session.add(cities)
+    session.commit()
+    return cities
 
 
 ##########################################################
-# Boxer Prep
+# City and Favorites
 ##########################################################
 
-
-def test_clear_ring(ring_model):
-    """Test that clear_rimg empties the ring.
+def test_clear_favorites(favorites_model):
+    """Test that clear_favorites empties the favorites.
 
     """
-    ring_model.ring = [1, 2]  # Assuming boxer IDs 1 and 2 are in the ring)
+    favorites_model.favorites = [1, 2]  # Assuming boxer IDs 1 and 2 are in the favorites)
 
-    ring_model.clear_ring()
+    favorites_model.clear_favorites()
 
-    assert len(ring_model.ring) == 0, "Ring should be empty after calling clear_ring."
+    assert len(favorites_model.favorites) == 0, "Favorites should be empty after calling clear_favorites."
 
-def test_clear_ring_empty(ring_model, caplog):
-    """Test that calling clear_ring on an empty ring logs a warning and keeps the ring empty.
+def test_clear_favorite_empty(favorites_model, caplog):
+    """Test that calling clear_favorite on an empty favorites logs a warning and keeps the favorites empty.
 
     """
     with caplog.at_level("WARNING"):
-        ring_model.clear_ring()
+        favorites_model.clear_favorites()
 
-    assert len(ring_model.ring) == 0, "Ring should remain empty if it was already empty."
+    assert len(favorites_model.favorites) == 0, "Favorites should remain empty if it was already empty."
 
-    assert "Attempted to clear an empty ring." in caplog.text, "Expected a warning when clearing an empty ring."
+    assert "Attempted to clear an empty favorites." in caplog.text, "Expected a warning when clearing an empty Favorites."
 
-# was test_get_boxers_empty
-def test_get_cities_empty(favorites_model, caplog):
-    """Test that get_boxers returns an empty list when there are no boxers and logs a warning.
-
-    """
-    with caplog.at_level("WARNING"):
-        cities = favorites_model.get_all_cities_and_weather()
-
-    assert cities == [], "Expected get_boxers to return an empty list when there are no boxers."
-
-    assert "Retrieving boxers from an empty ring." in caplog.text, "Expected a warning when getting boxers from an empty ring."
-
-# test_get_boxers_with_data
-def test_get_cities_with_data(app, favorites_model, sample_cities):
-    """Test that get_boxers returns the correct list when there are boxers.
-
-    # Note that app is a fixture defined in the conftest.py file
+def test_get_cities_empty(favorites_model):
+    """Test that get_cities returns an empty list when there are no city and logs a warning.
 
     """
-    #favorites_model.ring.extend([boxer.id for boxer in sample_boxers])
+    favorites_model.favorites = []
+    assert favorites_model.get_all_cities_and_weather() == [], "Expected get_cities to return an empty list when there are no cities."
 
-    boxers = favorites_model.get_boxers()
-    assert boxers == sample_cities, "Expected get_boxers to return the correct boxers list."
+@patch("weatherFolder.models.cities_model.Cities.get_city_by_id")
+@patch("requests.get")
+@patch("os.getenv", return_value="fake-key")
+def test_get_cities_with_data(mock_getenv, mock_requests_get, mock_get_city_by_id, favorites_model, sample_city1, sample_city2):
+    """Test that get_all_cities_and_weather returns the correct (city, weather) tuples."""
 
-def test_get_boxers_uses_cache(ring_model, sample_boxer1, mocker):
-    ring_model.ring.append(sample_boxer1.id)
+    favorites_model.favorites = [sample_city1.id, sample_city2.id]
 
-    ring_model._boxer_cache[sample_boxer1.id] = sample_boxer1
-    ring_model._ttl[sample_boxer1.id] = time.time() + 100  # still valid
+    mock_get_city_by_id.side_effect = [sample_city1, sample_city2]
 
-    mock_get_by_id = mocker.patch("boxing.models.ring_model.Boxers.get_boxer_by_id")
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "weather": [{"description": "broken clouds"}]
+    }
+    mock_requests_get.return_value = mock_response
 
-    boxers = ring_model.get_boxers()
+    result = favorites_model.get_all_cities_and_weather()
 
-    assert boxers[0] == sample_boxer1
-    mock_get_by_id.assert_not_called()
+    expected = [
+        (sample_city1, "broken clouds"),
+        (sample_city2, "broken clouds")
+    ]
 
-def test_get_boxers_refreshes_on_expired_ttl(ring_model, sample_boxer1, mocker):
-    ring_model.ring.append(sample_boxer1.id)
+    assert [(c.name, w) for c, w in result] == [(c.name, w) for c, w in expected], "Expected correct cities and weather"
 
-    stale_boxer = mocker.Mock()
-    ring_model._boxer_cache[sample_boxer1.id] = stale_boxer
-    ring_model._ttl[sample_boxer1.id] = time.time() - 1  # TTL expired
-
-    mock_get_by_id = mocker.patch("boxing.models.ring_model.Boxers.get_boxer_by_id", return_value=sample_boxer1)
-
-    boxers = ring_model.get_boxers()
-
-    assert boxers[0] == sample_boxer1
-    mock_get_by_id.assert_called_once_with(sample_boxer1.id)
-    assert ring_model._boxer_cache[sample_boxer1.id] == sample_boxer1
-
-def test_cache_populated_on_get_boxers(ring_model, sample_boxer1, mocker):
-    mock_get_by_id = mocker.patch("boxing.models.ring_model.Boxers.get_boxer_by_id", return_value=sample_boxer1)
-
-    ring_model.ring.append(sample_boxer1.id)
-
-    boxers = ring_model.get_boxers()
-
-    assert sample_boxer1.id in ring_model._boxer_cache
-    assert sample_boxer1.id in ring_model._ttl
-    assert boxers[0] == sample_boxer1
-    mock_get_by_id.assert_called_once_with(sample_boxer1.id)
-
-def test_enter_ring(ring_model, sample_boxers, app):
-    """Test that a boxer is correctly added to the ring.
+def test_add_to_favorite(favorites_model, sample_city1):
+    """Test that a city is correctly added to the favorites.
 
     """
-    ring_model.enter_ring(sample_boxers[0].id)  # Assuming boxer with ID 1 is "Muhammad Ali"
+    favorites_model.add_to_favorite(sample_city1.id)  # Assuming boxer with ID 1 is "Muhammad Ali"
 
-    assert len(ring_model.ring) == 1, "Ring should contain one boxer after calling enter_ring."
-    assert ring_model.ring[0] == 1, "Expected 'Muhammad Ali' (id 1) in the ring."
+    assert len(favorites_model.favorites) == 1, "Favorites should contain one city after calling add_to_favorite."
+    assert favorites_model.favorites[0]== 1, "Expected 'Boston' in the favorite."
 
-    ring_model.enter_ring(sample_boxers[1].id)  # Assuming boxer with ID 2 is "Mike Tyson"
-
-    assert len(ring_model.ring) == 2, "Ring should contain two boxers after calling enter_ring."
-    assert ring_model.ring[1] == 2, "Expected 'Mike Tyson' (id 2) in the ring."
-
-def test_enter_ring_full(ring_model):
-    """Test that enter_ring raises an error when the ring is full.
+def test_add_to_favorite_full(favorites_model):
+    """Test that add_to_favorite raises an error when the favorites is full.
 
     """
-    ring_model.ring = [1, 2]
+    favorites_model.favorites = [1, 2]
 
-    with pytest.raises(ValueError, match="Ring is full"):
-        ring_model.enter_ring(3)
+    with pytest.raises(RuntimeError):
+        favorites_model.add_to_favorite(3)
 
-    assert len(ring_model.ring) == 2, "Ring should still contain only 2 boxers after trying to add a third."
+    assert len(favorites_model.favorites) == 2, "Favorites should still contain only the two cities."
 
+@patch("requests.get") 
+def test_get_weather_city(mock_get, favorites_model, sample_city1):
+    """Test that get_weather_city returns mocked weather description."""
+    favorites_model.favorites = [sample_city1.id]
 
-##########################################################
-# Fight
-##########################################################
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "weather": [{"description": "overcast clouds"}]
+    }
+    mock_get.return_value = mock_response
 
+    expected = "overcast clouds"
+    result = favorites_model.get_weather_city(sample_city1.id)
+    assert result == expected
 
-def test_get_fighting_skill(ring_model, sample_boxers):
-    """Test the get_fighting_skill method.
+def test_get_weather_city_error(favorites_model, sample_city1):
+    """Test that get_weather_city raises ValueError for invalid ID and returns a valid string for a valid city."""
+    favorites_model.favorites = [1, 2]
 
-    """
-    expected_score_1 = (210 * 12) + (78 / 10)  # 210 * 12 + 7.8 = 2527.8
-    assert ring_model.get_fighting_skill(sample_boxers[0]) == expected_score_1, f"Expected score: {expected_score_1}, got {ring_model.get_fighting_skill(boxer_1)}"
+    with pytest.raises(ValueError):
+        favorites_model.get_weather_city(9999)
 
-    expected_score_2 = (220 * 10) + (71 / 10) - 1  # 220 * 10 + 7.1 - 1 = 2206.1
-    assert ring_model.get_fighting_skill(sample_boxers[1]) == expected_score_2, f"Expected score: {expected_score_2}, got {ring_model.get_fighting_skill(boxer_2)}"
+    result = favorites_model.get_weather_city(sample_city1.id)
+    assert isinstance(result, str)
+    assert len(result) > 0
 
-def test_fight(ring_model, sample_boxers, caplog, mocker):
-    """Test the fight method with sample boxers.
+def test_get_forecast_city_success(favorites_model):
+    """Test that get_forecast_city returns valid forecast for a favorite city."""
 
-    """
-    ring_model.ring.extend(sample_boxers)
+    city = Cities(name="TestCity", lat=10.0, lon=20.0)
+    city.id = 1
+    favorites_model.favorites = [1]
 
-    mocker.patch("boxing.models.ring_model.RingModel.get_fighting_skill", side_effect=[2526.8, 2206.1])
-    mocker.patch("boxing.models.ring_model.get_random", return_value=0.42)
-    mocker.patch("boxing.models.ring_model.RingModel.get_boxers", return_value=sample_boxers)
-    mock_update_stats = mocker.patch("boxing.models.ring_model.Boxers.update_stats")
+    with patch("weatherFolder.models.cities_model.Cities.get_city_by_id", return_value=city), \
+         patch("requests.get") as mock_get, \
+         patch("os.getenv", return_value="fake-key"):
 
-    winner_name = ring_model.fight()
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "list": [
+                {
+                    "dt_txt": "2025-04-30 12:00:00",
+                    "main": {"temp_max": 25, "temp_min": 15},
+                    "pop": 0.1,
+                    "weather": [{"description": "clear sky"}]
+                }
+            ]
+        }
+        mock_get.return_value = mock_response
 
-    assert winner_name == "Muhammad Ali", f"Expected boxer 1 to win, but got {winner_name}"
+        result = favorites_model.get_forecast_city(1)
 
-    mock_update_stats.assert_any_call('win')  # boxer_1 is the winner
-    mock_update_stats.assert_any_call('loss')  # boxer_2 is the loser
+        assert result["city"] == "TestCity", "City name should match."
+        assert len(result["forecast"]) == 1, "Forecast list should contain one entry."
+        assert result["forecast"][0]["condition"] == "clear sky", "Forecast condition should match mock."
 
-    assert len(ring_model.ring) == 0, "Ring should be empty after the fight."
+def test_get_forecast_city_not_in_favorites(favorites_model):
+    """Test that get_forecast_city raises ValueError if city_id is not in favorites."""
 
-    assert "The winner is: Muhammad Ali" in caplog.text, "Expected winner log message not found."
+    favorites_model.favorites = []  # Empty favorites list
 
-def test_fight_with_empty_ring(ring_model):
-    """Test that the fight method raises a ValueError when there are fewer than two boxers.
-
-    """
-    with pytest.raises(ValueError, match="There must be two boxers to start a fight."):
-        ring_model.fight()
-
-def test_fight_with_one_boxer(ring_model, sample_boxer1):
-    """Test that the fight method raises a ValueError when there's only one boxer.
-
-    """
-    ring_model.ring.append(sample_boxer1)
-
-    with pytest.raises(ValueError, match="There must be two boxers to start a fight."):
-        ring_model.fight()
-
-def test_clear_cache(ring_model, sample_boxer1):
-    ring_model._boxer_cache[sample_boxer1.id] = sample_boxer1
-    ring_model._ttl[sample_boxer1.id] = time.time() + 100
-
-    ring_model.clear_cache()
-
-    assert ring_model._boxer_cache == {}
-    assert ring_model._ttl == {}
+    with pytest.raises(ValueError, match="City ID 1 is not in favorites."):
+        favorites_model.get_forecast_city(1)
