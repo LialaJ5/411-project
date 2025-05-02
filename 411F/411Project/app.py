@@ -432,7 +432,7 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
     
-    @app.route('/api/clear-favorites', methods=['POST'])
+    @app.route('/api/clear-favorites', methods=['DELETE'])
     @login_required
     def clear_favorites() -> Response:
         """Route to clear the list of cities from model favorites.

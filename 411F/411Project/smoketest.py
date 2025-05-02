@@ -6,20 +6,11 @@ def run_smoketest():
     username = "test"
     password = "test"
 
-    test_muhammad_ali = {
-        "name": "Muhammad Ali",
-        "weight": 210,
-        "height": 191,
-        "reach": 78,
-        "age": 32
-    }
-
-    test_joe_frazier = {
-        "name": "Joe Frazier",
-        "weight": 205,
-        "height": 182,
-        "reach": 73,
-        "age": 30
+    test_Boston = {
+        "id": 1,
+        "name" : "Boston",
+        "lat" : 52.97,
+        "lon" : -0.02
     }
 
     health_response = requests.get(f"{base_url}/health")
@@ -31,10 +22,10 @@ def run_smoketest():
     assert delete_user_response.json()["status"] == "success"
     print("Reset users successful")
 
-    delete_boxer_response = requests.delete(f"{base_url}/reset-boxers")
-    assert delete_boxer_response.status_code == 200
-    assert delete_boxer_response.json()["status"] == "success"
-    print("Reset boxers successful")
+    add_favorite_response = requests.post(f"{base_url}/add-to-favorite",json=test_Boston)
+    assert add_favorite_response.status_code == 200
+    assert add_favorite_response.json()["status"] == "success"
+    print("Add favorites successful")
 
     create_user_response = requests.put(f"{base_url}/create-user", json={
         "username": username,
@@ -55,11 +46,6 @@ def run_smoketest():
     assert login_resp.json()["status"] == "success"
     print("Login successful")
 
-    create_boxer_resp = session.post(f"{base_url}/add-boxer", json=test_muhammad_ali)
-    assert create_boxer_resp.status_code == 201
-    assert create_boxer_resp.json()["status"] == "success"
-    print("Boxer creation successful")
-
     # Change password
     change_password_resp = session.post(f"{base_url}/change-password", json={
         "new_password": "new_password"
@@ -77,22 +63,11 @@ def run_smoketest():
     assert login_resp.json()["status"] == "success"
     print("Login with new password successful")
 
-    create_boxer_resp = session.post(f"{base_url}/add-boxer", json=test_joe_frazier)
-    assert create_boxer_resp.status_code == 201
-    assert create_boxer_resp.json()["status"] == "success"
-    print("Boxer creation successful")
-
     # Log out
     logout_resp = session.post(f"{base_url}/logout")
     assert logout_resp.status_code == 200
     assert logout_resp.json()["status"] == "success"
     print("Logout successful")
-
-    create_boxer_logged_out_resp = session.post(f"{base_url}/add-boxer", json=test_muhammad_ali)
-    # This should fail because we are logged out
-    assert create_boxer_logged_out_resp.status_code == 401
-    assert create_boxer_logged_out_resp.json()["status"] == "error"
-    print("Boxer creation failed as expected")
 
 if __name__ == "__main__":
     run_smoketest()
