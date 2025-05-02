@@ -19,7 +19,7 @@ class FavoritesModel:
 
     """
 
- #CHANGE (Finish)
+ 
     def __init__(self):
         """Initializes the FavoritesModel with an empty list of favorite cities.
         
@@ -29,8 +29,7 @@ class FavoritesModel:
 
         self.favorites: List[int] = []
 
-#CHANGE (Finish)
-    # Formerly clear_ring
+
     def clear_favorites(self):
         """Clears the list of cities.
         """
@@ -40,8 +39,7 @@ class FavoritesModel:
         logger.info("Clearing the cities from the favorites.")
         self.favorites.clear()
 
- #CHANGE (Finish)
-    #formerly enter_ring
+
     def add_to_favorite(self, city_id: int):
         """Adds the specified city (by city ID) to the favorites list.
 
@@ -93,7 +91,7 @@ class FavoritesModel:
         weather = city.get_weather()
         return weather
 
-    #formerly get_boxers
+
     def get_all_cities_and_weather(self):
         """Retrieves the current list of cities in the list.
 
@@ -121,10 +119,10 @@ class FavoritesModel:
             #    logger.debug(f"Using cached boxer {city_id} (TTL valid).")
             cities.append((city,weather))
 
-        logger.info(f"Retrieved {len(cities)} boxers from the ring.")
+        logger.info(f"Retrieved {len(cities)} cities from favorites.")
         return cities
     
-#CHANGE (Finish)
+
     def get_forecast_city(self, city_id: int) -> dict:
         """Get the weather forecast for the specified favorite city.
 
