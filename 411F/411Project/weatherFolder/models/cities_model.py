@@ -116,5 +116,7 @@ class Cities(db.Model):
                 return data["weather"][0]["description"]
             else:
                 logger.info("No weather for that city.")
+                raise Exception("Weather API call failed")
+
         except Exception as e:
             raise Exception(f"Error with {e}")
