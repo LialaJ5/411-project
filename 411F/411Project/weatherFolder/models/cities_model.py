@@ -92,10 +92,7 @@ class Cities(db.Model):
             logger.info(f"City with ID {city_id} not found.")
             raise ValueError(f"City with ID {city_id} not found.")
         return city
-<<<<<<< HEAD
-=======
 
->>>>>>> fd62715 (Updated app)
 
  #CHANGE
     def get_weather(self) -> str:

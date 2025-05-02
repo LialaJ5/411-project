@@ -558,7 +558,7 @@ def create_app(config_class=ProductionConfig):
             app.logger.info(f"City '{city_name}' added to favorite. Current cities: {cities}")
 
             return make_response(jsonify({
-                "status": "error",
+                "status": "success",
                 "message": f"City '{city_name} is now in your favorites.",
             }), 200)
 
